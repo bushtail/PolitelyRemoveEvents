@@ -1,4 +1,4 @@
-﻿variables:
+variables:
   RELEASE_NAME: "PolitelyRemoveEvents"
   AUTHOR: "bushtail"
   DLL_NAME: "PolitelyRemoveEvents.dll"
@@ -10,6 +10,7 @@ stages:
   - package
   - release
 
+# Comment bc pipeline failed first time
 build:
   stage: build
   image: mcr.microsoft.com/dotnet/sdk:9.0
