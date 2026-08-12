@@ -1,26 +1,23 @@
 ﻿using System.Reflection;
 using System.Text.Json;
 using JetBrains.Annotations;
+using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
-using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Helpers.Server;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Servers;
 
 namespace PolitelyRemoveEvents;
 
-[UsedImplicitly]
-[Injectable(TypePriority = OnLoadOrder.Database)]
-public class PolitelyRemoveEvents(ConfigServer cfgServer, ModHelper modHelper, ISptLogger<PolitelyRemoveEvents> logger) : IOnLoad
+[Injectable(TypePriority = OnLoadOrder.Preload), UsedImplicitly]
+public class PolitelyRemoveEvents(SeasonalEventConfig seasonalEventConfig, ModHelper modHelper, ISptLogger<PolitelyRemoveEvents> logger) : IOnLoad
 {
     private PREConfig? _config;
     private readonly JsonSerializerOptions _jsonSerializerOptions = new() { WriteIndented = true };
-    public Task OnLoad()
+    
+    public Task OnLoadAsync(CancellationToken cancellationToken)
     {
-        var questCfg = cfgServer.GetConfig<SeasonalEventConfig>();
-        
         var modFolder = modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly());
         var cfgPath = Path.Combine(modFolder, "config.json");
         
@@ -32,7 +29,7 @@ public class PolitelyRemoveEvents(ConfigServer cfgServer, ModHelper modHelper, I
         
         _config = JsonSerializer.Deserialize<PREConfig>(File.ReadAllText(cfgPath), _jsonSerializerOptions);
         
-        foreach (var seasonalEvent in questCfg.Events)
+        foreach (var seasonalEvent in seasonalEventConfig.Events)
         {
             switch (seasonalEvent.Type)
             {
